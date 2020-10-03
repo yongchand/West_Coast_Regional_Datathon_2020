@@ -9,6 +9,7 @@ def prepare_data(file_path: str):
 
 
 def linear_regression_training(df: pd.DataFrame):
+    """ Train linear regression model for movies w/ or w/o budgets"""
     pass
 
 
