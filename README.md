@@ -12,3 +12,6 @@ Here is the steps to set up virtual environment:
 (3) pip install -r requirements.txt
 
 All necessary dependencies are managed in requirements.txt and shared across repo.
+
+# Movie Gross Forecasting
+Movie gross value forecasting is done in gross_forecasting folder.
