@@ -14,4 +14,5 @@ Here is the steps to set up virtual environment:
 All necessary dependencies are managed in requirements.txt and shared across repo.
 
 # Movie Gross Forecasting
-Movie gross value forecasting is done in gross_forecasting folder.
+The code and brief introduction can be found in gross_forecasting folder. The entry point is
+gross_forecasting/run.py.
