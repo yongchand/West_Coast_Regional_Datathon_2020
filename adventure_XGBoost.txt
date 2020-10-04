@@ -1,0 +1,72 @@
+XGBoost Report 
+Best Parameter{'XGBoost__estimator__learning_rate': 0.10008545946475544, 'XGBoost__estimator__max_depth': 17, 'XGBoost__estimator__max_features': 0.30000000000000004, 'XGBoost__estimator__n_estimators': 121}
+Training Set Result) 
+Confusion Matrix: [[[185   4]
+  [  9 114]]
+
+ [[196   2]
+  [ 11 103]]
+
+ [[246   0]
+  [  6  60]]
+
+ [[234   3]
+  [  8  67]]
+
+ [[284   0]
+  [  3  25]]
+
+ [[237   1]
+  [  5  69]]
+
+ [[229   0]
+  [  9  74]]
+
+ [[251   2]
+  [  6  53]]
+
+ [[277   0]
+  [  4  31]]
+
+ [[276   0]
+  [  3  33]]]
+Accuracy: 0.9756410256410256
+Macro Precision: 0.9853547582361142
+Macro Recall: 0.905030416012328
+Macro F1: 0.9433361203020114
+Hamming Loss: 0.02435897435897436
+Test Set Result) 
+Confusion Matrix: [[[36 10]
+  [10 23]]
+
+ [[48 12]
+  [10  9]]
+
+ [[57  2]
+  [ 6 14]]
+
+ [[61  3]
+  [10  5]]
+
+ [[73  2]
+  [ 4  0]]
+
+ [[59  3]
+  [16  1]]
+
+ [[49  6]
+  [17  7]]
+
+ [[56  5]
+  [16  2]]
+
+ [[67  0]
+  [12  0]]
+
+ [[73  0]
+  [ 6  0]]]
+Accuracy: 0.8101265822784809
+Macro Precision: 0.369971694971695
+Macro Recall: 0.26655885480188884
+Macro F1: 0.29931465570596
+Hamming Loss: 0.189873417721519

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import csv
 import glob
 import warnings
-from sklearn.externals import joblib
+# from sklearn.externals import joblib
 warnings.filterwarnings("ignore")
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -19,6 +19,9 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 from sklearn import impute
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.datasets import make_multilabel_classification
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.feature_selection import VarianceThreshold
+from skmultilearn.problem_transform import BinaryRelevance
 
 # numpy, pandas, and sklearn modules
 import numpy as np
@@ -31,11 +34,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import RandomizedSearchCV, \
     LeaveOneOut, LeavePOut, StratifiedKFold, GridSearchCV, StratifiedShuffleSplit
 from sklearn import metrics
-from sklearn.externals import joblib
 from skmultilearn.model_selection import iterative_train_test_split
 # local ML modules
-#from datasets import get_dataset TODO: Implement dataset
+#from datasets import get_dataset
 import classifiers
+import preprocessors as preprocessors
+import MultiAnalysisTag
 #from constant import DI_LABELS_CSV, PROTPARAM_FEATURES, SLIDING_WIN_FEATURES, EMBEDDING_5_7_FEATURES
 #from learning_curve import plot_learning_curve
 #import preprocessors as preprocessors
@@ -55,7 +59,7 @@ CV_lc = StratifiedKFold(n_splits=10, random_state=0)
 # functions
 ######################################################################
 
-def make_pipeline(classifier, n, d):
+def make_pipeline(preprocessor_list, classifier, n, d):
     """Make ML pipeline.
     Parameters
     --------------------
@@ -67,8 +71,11 @@ def make_pipeline(classifier, n, d):
     param_grid = {}
 
     # apply preprocessing (imputation) and append to steps
-    transformer = impute.SimpleImputer(strategy='constant', fill_value=0)
-    steps.append(("Imputation", transformer))
+    for pp in preprocessor_list:
+        process = getattr(preprocessors, pp)()
+        name = type(process).__name__
+        transform = process.transformer_
+        steps.append((name, transform))
 
     # get classifier and hyperparameters to tune using cross-validation
     clf = getattr(classifiers, classifier)(n,d)
@@ -134,6 +141,7 @@ def report_metrics(y_true, y_pred, labels=None, target_names=None):
 
 
 def run_one_featureset(
+    preprocessor_list,
     classifier,
     X_train,
     y_train,
@@ -166,8 +174,8 @@ def run_one_featureset(
         
     log = open(classifier+'.txt', 'w' , encoding='utf-8')
     # make pipeline
-    pipe, param_grid = make_pipeline(classifier, n, d)
-
+    pipe, param_grid = make_pipeline(preprocessor_list, classifier, n, d)
+    print(pipe)
     # get param grid size
     sz = 1
     try:
@@ -222,13 +230,13 @@ def run_one_featureset(
     
     #check
     n_feature, n_labels = y_train.shape
-    print(n_labels)
     for i in range(n_labels):
         fpr[i], tpr[i], _ = metrics.roc_curve(y_true[:, i], y_score[:, i])
         roc_auc[i] = metrics.auc(fpr[i], tpr[i])
     
-    
-    highkey = roc_auc = sorted(roc_auc, key=roc_auc.get, reverse=True)[:3]
+    print(roc_auc)
+    highkey = sorted(roc_auc, key=roc_auc.get, reverse=True)[:3]
+
 
     colors = cycle(['blue', 'red', 'green'])
     for i, color in zip(highkey, colors):
@@ -247,7 +255,6 @@ def run_one_featureset(
     plt.savefig(name)
     plt.close()
 
-    #TODO: Implement Learning Curve Later
 
     #Report final testing result
     print("\n")
@@ -265,22 +272,18 @@ def run_one_featureset(
     
     log.close()
 
-    name = classifier+'_model.joblib'
-    joblib.dump(search, name)
-    #TODO: Create bar graph for each metrics
+    # name = classifier+'_model.joblib'
+    # joblib.dump(search, name)
 
 
-# ######################################################################
-# # main
-# ######################################################################
-
-#TODO: Implement when ready
-def main():
-    # set random seed (for repeatability)
+def run(X,y):
     np.random.seed(42)
-    X, y = make_multilabel_classification(n_samples=1000, n_features=10, n_classes=4, n_labels=2, random_state=1)
-    #TODO: Make X as binary
-    X_train, y_train, X_test, y_test = iterative_train_test_split(X, y, test_size = 0.2)
+    X_train, X_test, y_train,y_test = train_test_split(X, y, test_size = 0.2)
+    # selector = VarianceThreshold()
+    # X_train = selector.fit_transform(X_train)
+    # X_test = selector.fit_transform(X_test)
+    # y_train = selector.fit_transform(y_train)
+    # y_test = selector.fit_transform(y_test)
     n,d = X_train.shape
 
     for clf in classifiers.CLASSIFIERS:
@@ -293,11 +296,12 @@ def main():
             iterations = N_ITER
         n_splits = 10
         run_one_featureset(
+            preprocessor_list=preprocessors.PREPROCESSORS,
             classifier=clf,
-            X_train=X_train, 
-            y_train=y_train, 
-            X_test=X_test, 
-            y_test=y_test, 
+            X_train=np.array(X_train), 
+            y_train=np.array(y_train), 
+            X_test=np.array(X_test), 
+            y_test=np.array(y_test), 
             n=n, 
             d=d,
             scoring='f1_macro',
@@ -305,6 +309,20 @@ def main():
             n_jobs=-1,
             n_splits=n_splits
             )
+
+
+
+# ######################################################################
+# # main
+# ######################################################################
+
+
+def main():
+    # set random seed (for repeatability)
+    np.random.seed(42)
+    X, y= MultiAnalysisTag.main()
+    print(np.array(X),np.array(y))
+    run(np.array(X),np.array(y))
 
 if __name__ == "__main__":
     main()
